@@ -1,14 +1,18 @@
 var App = function() {
-  var app = {};
+  var roomList = [];
+  var uniqRooms = [];
 };
 
 App.prototype.init = function() {
-
+  console.log('INITIALIZE STUFF');
+  var parseServer = 'https://api.parse.com/1/classes/messages';
+  chatterboxData = this.fetch(parseServer);
+  //console.log(chatterboxData);
+  //this.renderMessage(chatterboxData.results[0].text);
 };
 
 App.prototype.send = function(message) {
   $.ajax({
-  // This is the url you should use to communicate with the parse API server.
     url: 'https://api.parse.com/1/classes/messages',
     type: 'POST',
     data: JSON.stringify(message),
@@ -17,25 +21,35 @@ App.prototype.send = function(message) {
       console.log('chatterbox: Message sent');
     },
     error: function (data) {
-      // See: https://developer.mozilla.org/en-US/docs/Web/API/console.error
       console.error('chatterbox: Failed to send message', data);
     }
   });
 };
 
 App.prototype.fetch = function(url) {
+  var that = this;
   $.ajax({
-  // This is the url you should use to communicate with the parse API server.
     url: url,
     type: 'GET',
-    data: JSON.stringify(message),
-    contentType: 'application/json',
+    dataType: 'json',
     success: function (data) {
-      console.log('chatterbox: Message sent');
+      console.log('chatterbox: Message retrieved');
+      console.log(data);
+      var roomList = [];
+      var uniqRooms = [];
+
+      for (var i = 0; i < data.results.length; i++) {
+        roomList.push(data.results[i].roomname);
+        that.renderMessage(data.results[i]);
+      }
+
+      uniqRooms = _.uniq(roomList);
+      for (var j = 0; j < uniqRooms.length; j++) {
+        that.renderRoom(uniqRooms[j]);
+      }
     },
     error: function (data) {
-      // See: https://developer.mozilla.org/en-US/docs/Web/API/console.error
-      console.error('chatterbox: Failed to send message', data);
+      console.error('chatterbox: Failed to retrieve message', data);
     }
   });
 };
@@ -47,15 +61,72 @@ App.prototype.clearMessages = function() {
   }
 };
 
-App.prototype.renderMessage = function(message) {
-  var text = $('#chats').html('<blink>' + message.text + '</blink>');
-  var messages = document.getElementById('chats');
-  messages.append(text);
+App.prototype.renderMessage = function(data) {
+  var chat = document.getElementById('chats');
+  var messageBox = document.createElement('div');
+  messageBox.className = 'messageBox';
+
+  var msgUsername = document.createElement('div');
+  msgUsername.className = 'msgUsername';
+  msgUsername.innerHTML = data.username;
+
+  var msgText = document.createElement('div');
+  msgText.className = 'msgText';
+  msgText.innerHTML = data.text;
+
+  messageBox.appendChild(msgUsername);
+  messageBox.appendChild(msgText);
+
+  chat.appendChild(messageBox);
 
 };
 
-App.prototype.renderRoom = function() {
+App.prototype.renderRoom = function(roomName) {
+  var rooms = document.getElementById('roomSelect');
+  var newRoom = document.createElement('option');
 
+  newRoom.innerHTML = roomName;
+
+  rooms.appendChild(newRoom);
 };
 
 var app = new App();
+
+$(document).ready(function() {
+  app.init();
+});
+
+
+// var message = {
+//   username: 'name',
+//   text: 'this is a string',
+//   roomname: 'random'
+// };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -88,3 +88,34 @@ form input[type=text] {
     background-color: #0090da;
 }
 
+.messageBox {
+    margin: 10px;
+    background-color: #dfdfde;
+    padding: 5px;
+}
+
+.messageBox .msgUsername {
+    font-weight: bold;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
