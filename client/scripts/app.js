@@ -41,10 +41,16 @@ App.prototype.fetch = function(url) {
 };
 
 App.prototype.clearMessages = function() {
-  $('#chats').remove();
+  var messages = document.getElementById('chats');
+  while (messages.firstChild) {
+    messages.firstChild.remove();
+  }
 };
 
 App.prototype.renderMessage = function(message) {
+  var text = $('#chats').html('<blink>' + message.text + '</blink>');
+  var messages = document.getElementById('chats');
+  messages.append(text);
 
 };
 
