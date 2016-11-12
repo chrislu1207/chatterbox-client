@@ -11,6 +11,7 @@ App.prototype.init = function() {
   console.log('INITIALIZE STUFF');
   var parseServer = 'https://api.parse.com/1/classes/messages';
   this.fetch(parseServer);
+  this.clearRoom();
   this.fetchRooms(parseServer);
 };
 
@@ -125,7 +126,7 @@ App.prototype.initRooms = function(data) {
   for (var i = 0; i < data.results.length; i++) {
     roomList.push(data.results[i].roomname);
   }
-  uniqRooms = _.uniq(roomList);
+  uniqRooms = _.uniq(roomList).sort();
   for (var j = 0; j < uniqRooms.length; j++) {
     this.renderRoom(uniqRooms[j]);
   }
@@ -219,7 +220,9 @@ $(document).ready(function() {
   var userMsg = {};
   userMsg.username = decodeURI(window.location.search.split('=')[1]);
 
-  document.getElementById('currentUser').innerHTML = 'Current User: ' + userMsg.username;
+  var navBarLogin = document.createElement('div');
+  navBarLogin.innerHTML = 'Logged in as: ' + userMsg.username;
+  document.getElementById('navBar').appendChild(navBarLogin);
 
   $('.submit').click(function() {
     var roomIndex = document.getElementById('roomSelect').selectedIndex;
@@ -233,6 +236,7 @@ $(document).ready(function() {
     userMsg.roomname = document.getElementById('newChatRoom').value;
     userMsg.text = 'Welcome to my new room!';
     app.send(userMsg, roomIndex);
+    app.init();
   });
 
   // window.setInterval(function() {

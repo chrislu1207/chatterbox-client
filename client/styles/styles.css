@@ -1,8 +1,27 @@
 body {
-    background: #eee;
+    background: #cecece;
     text-align: center;
     padding: 0 0;
+    margin: 0;
     font-family: arial, sans-serif;
+}
+
+p {
+    margin: 0;
+}
+nav {
+    height:45px;
+    width: 100%;
+    background-color: #666666;
+    position: fixed;
+    text-align: right;
+}
+
+nav div{
+    position:relative;
+    margin-top: 14px;
+    padding-right: 20px;
+    color: white;
 }
 
 #main, #chats {
@@ -17,9 +36,11 @@ body {
 
 #main h1 {
     margin-top: 0;
-    font-size: 35px;
+    font-size: 45px;
     margin-bottom: 5px;
     padding: 5px;
+    font-family: 'Inconsolata', monospace;
+    text-align: center;
 }
 
 #main h1 span {
@@ -47,9 +68,9 @@ body {
 }
 
 form {
-    padding: 20px;
+    padding: 5px;
     padding-left: 0;
-    margin-bottom: 20px;
+    margin-bottom: 0px;
 }
 
 form input[type=text] {
@@ -100,20 +121,27 @@ form input[type=text] {
 
 .friendList {
     list-style-type: none;
-    font-size: 20px;
+    font-family: 'Inconsolata', monospace;
+    font-size: 40px;
     width: 15%;
     height: 100%;
     position: fixed;
-    margin: 0 0 0 0;
+    margin: 45px 0 0 0;
     min-width: 200px;
-    background-color: white;
+    background-color: #b2b2b2;
 }
 
 .friendList a {
+    font-family: 'Varela Round', sans-serif;
     font-size: 18px;
+    color: white;
     padding: 0px;
     text-align: left;
     text-decoration: none;
+}
+
+.friendList li {
+    line-height: 20px;
 }
 
 .msgUsername {
