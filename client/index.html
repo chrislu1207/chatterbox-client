@@ -24,9 +24,10 @@
     <script src="scripts/app.js"></script>
   </head>
   <body>
-    <ul class='friendList'>Friend List</ul>
+    <ul class='friendList' style="padding-left: 0px">Friend List</ul>
     <div id="main">
       <h1>chatterbox</h1>
+      <span id='currentUser'></span>
       <!-- Your HTML goes here! -->
       <p>Rooms
         <select id='roomSelect' onchange='app.fetchByRoom("https://api.parse.com/1/classes/messages", this.selectedIndex)'></select>
@@ -39,7 +40,6 @@
         Message: <input id='userMsg' type='text'>
       </form>
       <button class='submit'>Submit</button>
-      <span id='currentUser'></span>
     </div>
     <div id="chats"></div>
   </body>

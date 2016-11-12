@@ -1,7 +1,12 @@
 var App = function() {
   var server = 'https://api.parse.com/1/classes/messages';
+  window.friendsObj = {};
 };
-
+/*
+  ========================================
+  Init
+  ========================================
+*/
 App.prototype.init = function() {
   console.log('INITIALIZE STUFF');
   var parseServer = 'https://api.parse.com/1/classes/messages';
@@ -9,6 +14,11 @@ App.prototype.init = function() {
   this.fetchRooms(parseServer);
 };
 
+/*
+  ========================================
+  POST Request
+  ========================================
+*/
 App.prototype.send = function(message, roomIndex) {
   var that = this;
   console.log(message);
@@ -27,6 +37,11 @@ App.prototype.send = function(message, roomIndex) {
   });
 };
 
+/*
+  ========================================
+  GET Requests
+  ========================================
+*/
 App.prototype.fetch = function(url) {
   var that = this;
   $.ajax({
@@ -98,14 +113,11 @@ App.prototype.fetchByUsername = function(url, username) {
   });
 };
 
-App.prototype.refresh = function(data) {
-  this.clearMessages();
-
-  for (var i = 0; i < data.results.length; i++) {
-    this.renderMessage(data.results[i]);
-  }
-};
-
+/*
+  ========================================
+  Chat Room Dropdown Selector
+  ========================================
+*/
 App.prototype.initRooms = function(data) {
   var roomList = [];
   var uniqRooms = [];
@@ -119,13 +131,25 @@ App.prototype.initRooms = function(data) {
   }
 };
 
-App.prototype.clearMessages = function() {
-  var messages = document.getElementById('chats');
-  while (messages.firstChild) {
-    messages.firstChild.remove();
+App.prototype.renderRoom = function(roomName) {
+  var rooms = document.getElementById('roomSelect');
+  var newRoom = document.createElement('option');
+  newRoom.innerHTML = roomName;
+  rooms.appendChild(newRoom);
+};
+
+App.prototype.clearRoom = function(roomName) {
+  var rooms = document.getElementById('roomSelect');
+  while (rooms.firstChild) {
+    rooms.firstChild.remove();
   }
 };
 
+/*
+  ========================================
+  Chat Box Messages
+  ========================================
+*/
 App.prototype.renderMessage = function(data) {
   var chat = document.getElementById('chats');
   var messageBox = document.createElement('div');
@@ -142,38 +166,50 @@ App.prototype.renderMessage = function(data) {
 
   messageBox.appendChild(msgUsername);
   messageBox.appendChild(msgText);
-
   chat.appendChild(messageBox);
 
 };
 
-App.prototype.renderRoom = function(roomName) {
-  var rooms = document.getElementById('roomSelect');
-  var newRoom = document.createElement('option');
-
-  newRoom.innerHTML = roomName;
-
-  rooms.appendChild(newRoom);
-};
-
-App.prototype.clearRoom = function(roomName) {
-  var rooms = document.getElementById('roomSelect');
-  while (rooms.firstChild) {
-    rooms.firstChild.remove();
+App.prototype.clearMessages = function() {
+  var messages = document.getElementById('chats');
+  while (messages.firstChild) {
+    messages.firstChild.remove();
   }
 };
 
-App.prototype.addToFriendList = function() {
-  console.log(this.innerHTML);
-  var friend = document.createElement('li');
-  friend.innerHTML = this.innerHTML;
-  friend.className = 'friends';
-  friend.onclick = app.fetchByUsername('https://api.parse.com/1/classes/messages', this.innerHTML);
-  $('.friendList').append(friend);
-  // $('.friendList').append('<li class="friends"><a href="#">' + this.innerHTML + '</a></li>');
-  //$('.friendList').append('<li onclick="app.fetchByUsername(' + 'https://api.parse.com/1/classes/messages,' + this.innerHTML + ')">' + this.innerHTML + '</li>');
+App.prototype.refresh = function(data) {
+  this.clearMessages();
+  for (var i = 0; i < data.results.length; i++) {
+    this.renderMessage(data.results[i]);
+  }
 };
 
+/*
+  ========================================
+  Friends List
+  ========================================
+*/
+App.prototype.addToFriendList = function() {
+  console.log(window.friendsObj);
+  //var friend = document.createElement('li');
+  //friend.innerHTML = this.innerHTML;
+  //friend.className = 'friends';
+  //$('.friendList').append(friend);
+  //friend.onclick = app.fetchByUsername('https://api.parse.com/1/classes/messages', this.innerHTML);
+  if (!window.friendsObj[this.innerHTML]){
+    window.friendsObj[this.innerHTML] = this.innerHTML;
+    $('.friendList').append('<li class="friends"><a href="#">' + this.innerHTML + '</a></li>');
+    $('a[href="#"]').click(function() {
+      app.fetchByUsername('https://api.parse.com/1/classes/messages', this.innerHTML)
+    });
+  }
+  //$('.friendList').append('<li onclick="app.fetchByUsername(' + 'https://api.parse.com/1/classes/messages,' + this.innerHTML + ')">' + this.innerHTML + '</li>');
+};
+/*
+  ========================================
+  jQuery and Click Handlers
+  ========================================
+*/
 var app = new App();
 
 $(document).ready(function() {
@@ -183,7 +219,7 @@ $(document).ready(function() {
   var userMsg = {};
   userMsg.username = decodeURI(window.location.search.split('=')[1]);
 
-  document.getElementById('currentUser').innerHTML = 'Currently logged in as: ' + userMsg.username;
+  document.getElementById('currentUser').innerHTML = 'Current User: ' + userMsg.username;
 
   $('.submit').click(function() {
     var roomIndex = document.getElementById('roomSelect').selectedIndex;
