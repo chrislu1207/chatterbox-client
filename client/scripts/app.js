@@ -1,24 +1,25 @@
 var App = function() {
-  var roomList = [];
-  var uniqRooms = [];
+  var server = 'https://api.parse.com/1/classes/messages';
 };
 
 App.prototype.init = function() {
   console.log('INITIALIZE STUFF');
   var parseServer = 'https://api.parse.com/1/classes/messages';
-  chatterboxData = this.fetch(parseServer);
-  //console.log(chatterboxData);
-  //this.renderMessage(chatterboxData.results[0].text);
+  this.fetch(parseServer);
+  this.fetchRooms(parseServer);
 };
 
-App.prototype.send = function(message) {
+App.prototype.send = function(message, roomIndex) {
+  var that = this;
+  console.log(message);
   $.ajax({
     url: 'https://api.parse.com/1/classes/messages',
     type: 'POST',
     data: JSON.stringify(message),
     contentType: 'application/json',
     success: function (data) {
-      console.log('chatterbox: Message sent');
+      console.log('chatterbox: Message sent', data);
+      that.fetchByRoom('https://api.parse.com/1/classes/messages', roomIndex);
     },
     error: function (data) {
       console.error('chatterbox: Failed to send message', data);
@@ -31,27 +32,91 @@ App.prototype.fetch = function(url) {
   $.ajax({
     url: url,
     type: 'GET',
+    data: 'order=-createdAt',
     dataType: 'json',
     success: function (data) {
       console.log('chatterbox: Message retrieved');
-      console.log(data);
-      var roomList = [];
-      var uniqRooms = [];
-
-      for (var i = 0; i < data.results.length; i++) {
-        roomList.push(data.results[i].roomname);
-        that.renderMessage(data.results[i]);
-      }
-
-      uniqRooms = _.uniq(roomList);
-      for (var j = 0; j < uniqRooms.length; j++) {
-        that.renderRoom(uniqRooms[j]);
-      }
+      that.refresh(data);
     },
     error: function (data) {
       console.error('chatterbox: Failed to retrieve message', data);
     }
   });
+};
+
+App.prototype.fetchRooms = function(url) {
+  var that = this;
+  $.ajax({
+    url: url,
+    type: 'GET',
+    data: 'order=-createdAt',
+    dataType: 'json',
+    success: function (data) {
+      console.log('chatterbox: Message retrieved');
+      that.initRooms(data);
+    },
+    error: function (data) {
+      console.error('chatterbox: Failed to retrieve message', data);
+    }
+  });
+};
+
+App.prototype.fetchByRoom = function(url, roomIndex) {
+  var that = this;
+  var selectedRoom = document.getElementById('roomSelect').options[roomIndex].value;
+  console.log(selectedRoom);
+  $.ajax({
+    url: url,
+    type: 'GET',
+    data: 'where={"roomname":' + JSON.stringify(selectedRoom) + '}',
+    dataType: 'json',
+    success: function (data) {
+      console.log('chatterbox: Message retrieved');
+      that.refresh(data);
+    },
+    error: function (data) {
+      console.error('chatterbox: Failed to retrieve message', data);
+    }
+  });
+};
+
+App.prototype.fetchByUsername = function(url, username) {
+  console.log(username);
+  var that = this;
+  $.ajax({
+    url: url,
+    type: 'GET',
+    data: 'where={"username":' + JSON.stringify(username) + '}',
+    dataType: 'json',
+    success: function (data) {
+      console.log('chatterbox: Message retrieved');
+      that.refresh(data);
+    },
+    error: function (data) {
+      console.error('chatterbox: Failed to retrieve message', data);
+    }
+  });
+};
+
+App.prototype.refresh = function(data) {
+  this.clearMessages();
+
+  for (var i = 0; i < data.results.length; i++) {
+    this.renderMessage(data.results[i]);
+  }
+};
+
+App.prototype.initRooms = function(data) {
+  var roomList = [];
+  var uniqRooms = [];
+
+  for (var i = 0; i < data.results.length; i++) {
+    roomList.push(data.results[i].roomname);
+  }
+  uniqRooms = _.uniq(roomList);
+  for (var j = 0; j < uniqRooms.length; j++) {
+    this.renderRoom(uniqRooms[j]);
+  }
 };
 
 App.prototype.clearMessages = function() {
@@ -68,6 +133,7 @@ App.prototype.renderMessage = function(data) {
 
   var msgUsername = document.createElement('div');
   msgUsername.className = 'msgUsername';
+  msgUsername.onclick = this.addToFriendList;
   msgUsername.innerHTML = data.username;
 
   var msgText = document.createElement('div');
@@ -90,18 +156,54 @@ App.prototype.renderRoom = function(roomName) {
   rooms.appendChild(newRoom);
 };
 
+App.prototype.clearRoom = function(roomName) {
+  var rooms = document.getElementById('roomSelect');
+  while (rooms.firstChild) {
+    rooms.firstChild.remove();
+  }
+};
+
+App.prototype.addToFriendList = function() {
+  console.log(this.innerHTML);
+  var friend = document.createElement('li');
+  friend.innerHTML = this.innerHTML;
+  friend.className = 'friends';
+  friend.onclick = app.fetchByUsername('https://api.parse.com/1/classes/messages', this.innerHTML);
+  $('.friendList').append(friend);
+  // $('.friendList').append('<li class="friends"><a href="#">' + this.innerHTML + '</a></li>');
+  //$('.friendList').append('<li onclick="app.fetchByUsername(' + 'https://api.parse.com/1/classes/messages,' + this.innerHTML + ')">' + this.innerHTML + '</li>');
+};
+
 var app = new App();
 
 $(document).ready(function() {
   app.init();
+
+  // console.log('Username is', window.location.search.split('=')[1] );
+  var userMsg = {};
+  userMsg.username = decodeURI(window.location.search.split('=')[1]);
+
+  document.getElementById('currentUser').innerHTML = 'Currently logged in as: ' + userMsg.username;
+
+  $('.submit').click(function() {
+    var roomIndex = document.getElementById('roomSelect').selectedIndex;
+    userMsg.text = document.getElementById('userMsg').value;
+    userMsg.roomname = document.getElementById('roomSelect').value;
+    app.send(userMsg, roomIndex);
+  });
+
+  $('.addRoom').click(function() {
+    var roomIndex = document.getElementById('roomSelect').selectedIndex;
+    userMsg.roomname = document.getElementById('newChatRoom').value;
+    userMsg.text = 'Welcome to my new room!';
+    app.send(userMsg, roomIndex);
+  });
+
+  // window.setInterval(function() {
+  //   app.fetch('https://api.parse.com/1/classes/messages');
+  // }, 3000);
+
 });
-
-
-// var message = {
-//   username: 'name',
-//   text: 'this is a string',
-//   roomname: 'random'
-// };
 
 
 
