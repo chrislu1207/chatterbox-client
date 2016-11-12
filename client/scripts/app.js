@@ -78,6 +78,7 @@ App.prototype.fetchRooms = function(url) {
 };
 
 App.prototype.fetchByRoom = function(url, roomIndex) {
+  window.userTag = false;
   var that = this;
   var selectedRoom = document.getElementById('roomSelect').options[roomIndex].value;
   console.log(selectedRoom);
@@ -201,6 +202,7 @@ App.prototype.addToFriendList = function() {
     window.friendsObj[this.innerHTML] = this.innerHTML;
     $('.friendList').append('<li class="friends"><a href="#">' + this.innerHTML + '</a></li>');
     $('a[href="#"]').click(function() {
+      window.userTag = true;
       app.fetchByUsername('https://api.parse.com/1/classes/messages', this.innerHTML);
     });
   }
@@ -239,9 +241,12 @@ $(document).ready(function() {
     app.init();
   });
 
-  // window.setInterval(function() {
-  //   app.fetch('https://api.parse.com/1/classes/messages');
-  // }, 3000);
+  window.setInterval(function() {
+    var roomIndex = document.getElementById('roomSelect').selectedIndex;
+    if (!window.userTag) {
+      app.fetchByRoom('https://api.parse.com/1/classes/messages', roomIndex);
+    }
+  }, 2000);
 
 });
 
