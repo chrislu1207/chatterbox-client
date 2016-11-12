@@ -196,11 +196,11 @@ App.prototype.addToFriendList = function() {
   //friend.className = 'friends';
   //$('.friendList').append(friend);
   //friend.onclick = app.fetchByUsername('https://api.parse.com/1/classes/messages', this.innerHTML);
-  if (!window.friendsObj[this.innerHTML]){
+  if (!window.friendsObj[this.innerHTML]) {
     window.friendsObj[this.innerHTML] = this.innerHTML;
     $('.friendList').append('<li class="friends"><a href="#">' + this.innerHTML + '</a></li>');
     $('a[href="#"]').click(function() {
-      app.fetchByUsername('https://api.parse.com/1/classes/messages', this.innerHTML)
+      app.fetchByUsername('https://api.parse.com/1/classes/messages', this.innerHTML);
     });
   }
   //$('.friendList').append('<li onclick="app.fetchByUsername(' + 'https://api.parse.com/1/classes/messages,' + this.innerHTML + ')">' + this.innerHTML + '</li>');
